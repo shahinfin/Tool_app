@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
 
 if 'column_count' not in st.session_state:
     st.session_state.column_count = 1
@@ -89,10 +88,3 @@ if submit_data:
     col8.write(f'{int(share_to_issue)}')
     col9.write(f'{investors_ownership:.2f}%')
 
-    fig = plt.figure(figsize=(10, 7))
-    pie_data = ownership_df['stock'].to_list() + [int(share_to_issue)]
-    pie_legends = ownership_df['name'].to_list() + ['Investors']
-    plt.pie(pie_data, startangle=90, autopct='%1.1f%%')
-    plt.title('Percentage Ownership')
-    plt.legend(pie_legends, title='Owners', loc='center left', bbox_to_anchor=(1, 0, 0.5, 1))
-    st.pyplot(fig)
