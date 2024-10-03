@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 
 if 'column_count' not in st.session_state:
     st.session_state.column_count = 1
@@ -17,15 +16,17 @@ for i in range(st.session_state.column_count):
     ownership_stock = col3.number_input('Stock', key=f'stock{i}', step=1, min_value=0)
 
     if ownership_name and ownership_stock >= 0:
-        ownership.append([ownership_name, float(ownership_percentage), ownership_stock])
+        ownership.append({
+            'name': ownership_name,
+            'percentage': float(ownership_percentage),
+            'stock': ownership_stock
+        })
 
 input_amount_rise = st.text_input('How much money are you looking to raise?')
 input_premoney = st.text_input('What is your pre-money valuation?')
 submit_data = st.button('Submit details')
 
 if submit_data:
-    ownership_df = pd.DataFrame(ownership, columns=['name', 'percentage', 'stock'])
-    
     try:
         input_stocks_count = int(input_stocks_count) if input_stocks_count else 0
         input_amount_rise = int(input_amount_rise) if input_amount_rise else 0
@@ -41,12 +42,12 @@ if submit_data:
     except ValueError:
         st.error('Please enter valid numeric values for stock count, amount to raise, and pre-money valuation.')
 
-    if ownership_df['percentage'].sum() > 100:
-        st.error('Total percentage should be equal to 100%')
+    if sum(item['percentage'] for item in ownership) > 100:
+        st.error('Total percentage should not exceed 100%')
 
     st.subheader('Result')
     st.write('# Basics #')
-    
+
     post_money_valuation = input_amount_rise + input_premoney
     share_price = input_premoney / input_stocks_count if input_stocks_count else 0
     share_to_issue = input_amount_rise / share_price if share_price else 0
@@ -59,7 +60,7 @@ if submit_data:
         st.write('Stock that needs to be issued')
         st.write('Total company stock after funding')
         st.write("Investor's ownership")
-    
+
     with col5:
         st.write(f'{post_money_valuation}')
         st.write(f'{int(share_to_issue)}')
@@ -78,13 +79,14 @@ if submit_data:
         col8.write('## Percentage (pre-funding) ##')
         col9.write('## Percentage Ownership ##')
 
-    for _, row in ownership_df.iterrows():
-        col7.write(f"{row['name']}")
-        col8.write(f"{row['stock']}")
-        new_ownership_percentage = (row['stock'] / total_stock) * 100 if total_stock else 0
+    for item in ownership:
+        new_ownership_percentage = (item['stock'] / total_stock) * 100 if total_stock else 0
+        col7.write(f"{item['name']}")
+        col8.write(f"{item['stock']}")
         col9.write(f"{new_ownership_percentage:.2f}%")
 
     col7.write('Investors')
     col8.write(f'{int(share_to_issue)}')
     col9.write(f'{investors_ownership:.2f}%')
 
+    st.write("Pie chart visualization can be handled using Streamlit's built-in `st.bar_chart` for simplicity or by re-integrating another graphing library like Plotly.")
